@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chat Pubblica Semplice</title>
+<style>
+  body { font-family: monospace; background: #111; color: #0f0; margin: 20px; }
+  #chat { white-space: pre-wrap; border: 1px solid #0f0; height: 400px; overflow-y: scroll; padding: 10px; }
+  #message { width: 80%; padding: 5px; font-size: 1rem; background: #222; color: #0f0; border: 1px solid #0f0; }
+  button { padding: 5px 10px; font-size: 1rem; background: #0f0; color: #000; border: none; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<h2>Chat Pubblica</h2>
+<div id="chat"></div>
+<input id="message" placeholder="Scrivi un messaggio..." />
+<button onclick="sendMessage()">Invia</button>
+
+<script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAMe7R4dofUFJGiU2m-xxMw8AtDZ0hMKh0",
+  authDomain: "chat2-cc977.firebaseapp.com",
+  projectId: "chat2-cc977",
+  storageBucket: "chat2-cc977.firebasestorage.app",
+  messagingSenderId: "494859441631",
+  appId: "1:494859441631:web:16e4901e36e7b2eeab606a"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+async function sendMessage() {
+  const input = document.getElementById('message');
+  const msg = input.value.trim();
+  if (!msg) return;
+  await db.collection('publicChat').add({
+    message: msg,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  input.value = '';
+}
+
+const chat = document.getElementById('chat');
+db.collection('publicChat').orderBy('timestamp').onSnapshot(snapshot => {
+  chat.innerText = '';
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    chat.innerText += 'Anon:\n' + data.message + '\n\n';
+  });
+  chat.scrollTop = chat.scrollHeight;
+});
+</script>
+
+</body>
+</html>
